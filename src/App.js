@@ -1,183 +1,97 @@
-import React from 'react';
-import './App.css';
+import React, { ReactDOM } from "react";
+import "./dababy.mp3";
+import "./App.css";
 
-function RepeatButton(props) {
-  return (
-    <button 
-      aria-label='Play again.' 
-      id='repeatButton' 
-      onClick={props.onClick}>
-    </button>
-  );
-}
+const { createRef, Component } = React;
 
-function WinningSound() {
-  return (
-  <audio autoplay="autoplay" className="player" preload="false">
-    <source src="https://andyhoffman.codes/random-assets/img/slots/winning_slot.wav" />
-  </audio>  
-  );
-}
-
-class App extends React.Component {
+class Slots extends Component {
+  static defaultProps = {
+    text: [["ouïe", "toucher", "odorat", "la vue", "goût"], ["ouïe1", "toucher1", "odorat1", "la vue1", "goût1"], ["ouïe2", "toucher2", "odorat2", "la vue2", "goût2"]]
+  };
   constructor(props) {
     super(props);
-    this.state = {
-      winner: null
+    this.state = { text1: "0", text2: "0", text3: "0", rolling: false };
+
+    this.slotRef = [createRef(), createRef(), createRef()]
+  }
+
+  roll = () => {
+    this.setState({
+      rolling: true
+    });
+    setTimeout(() => {
+      this.setState({rolling: false});
+    }, 900);
+
+    this.slotRef.forEach((slot, i) => {
+      const selected = this.triggerSlotRotation(slot.current);
+      this.setState({ [`text${i + 1}`]: selected});
+      console.log(this.setState({ [`text${i + 1}`]: selected}))
+    });
+  };
+  getRandomInt = (min, max) =>{
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min;
+  };
+  triggerSlotRotation = ref => {this.getRandomInt(0,3)
+    function setTop(top) {
+      ref.style.top = `${top}px`;
     }
-    this.finishHandler = this.finishHandler.bind(this)
-    this.handleClick = this.handleClick.bind(this);
-  }  
-
-  handleClick() { 
-    this.setState({ winner: null });
-    this.emptyArray();
-    this._child1.forceUpdateHandler();
-    this._child2.forceUpdateHandler();
-  }
-
-  static matches = [];
-
-  finishHandler(value) {
-    App.matches.push(value);  
-
-    if (App.matches.length === 2) {
-      const first = App.matches[0];
-      let results = App.matches.every(match => match === first)
-      this.setState({ winner: results });
-    }
-  }
-
-  emptyArray() {
-    App.matches = [];
-  }
-
+    let options = ref.children;
+    let randomOption = Math.floor(
+      Math.random() * Slots.defaultProps.text.length
+    );
+    let choosenOption = options[randomOption];
+    setTop(this.triggerSlotRotation());
+    return Slots.defaultProps.text[randomOption];
+  };
   render() {
-    const { winner } = this.state;
-    let repeatButton = null;
-    let winningSound = null;
-
-    if (winner !== null) {
-      repeatButton = <RepeatButton onClick={this.handleClick} />
-    }
-    
-    if (winner) {
-      winningSound = <WinningSound />
-    }
-
     return (
-      <div>
-        {winningSound}
-        <div className={`spinner-container`}>
-          <Spinner onFinish={this.finishHandler} ref={(child) => { this._child1 = child; }} timer="1000" />
-          <Spinner onFinish={this.finishHandler} ref={(child) => { this._child2 = child; }} timer="1400" />
-          <div className="gradient-fade"></div>
+      <div className="SlotMachine">
+        <div className="slot">
+          <section>
+            <div className="container" ref={this.slotRef[0]}>
+              {Slots.defaultProps.text[0].map((texte, i ) => (
+                <div key={i}>
+                  <span>{texte}</span>
+                </div>
+              ))}
+            </div>
+          </section>
         </div>
-        {repeatButton}          
+        <div className="slot">
+          <section>
+            <div className="container" ref={this.slotRef[1]}>
+              {Slots.defaultProps.text[1].map((texte, i ) => (
+                <div key={i}>
+                  <span>{texte}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+        <div className="slot">
+          <section>
+            <div className="container" ref={this.slotRef[2]}>
+              {Slots.defaultProps.text[2].map((texte, i) => (
+                <div key={i}>
+                  <span>{texte}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+        <div
+          className={!this.state.rolling ? "roll rolling" : "roll"}
+          onClick={!this.state.rolling && this.roll}
+          disabled={this.state.rolling}
+        >
+          {this.state.rolling ? "Rolling..." : "ROLL"}
+        </div>
       </div>
     );
   }
-}  
-  
-class Spinner extends React.Component {  
-  constructor(props){
-    super(props);
-    this.forceUpdateHandler = this.forceUpdateHandler.bind(this);
-  };
-
-  forceUpdateHandler(){
-    this.reset();
-  }; 
-
-  reset() {
-    if (this.timer) { 
-      clearInterval(this.timer); 
-    }  
-
-    this.start = this.setStartPosition();
-
-    this.setState({
-      position: this.start,
-      timeRemaining: this.props.timer        
-    });
-
-    this.timer = setInterval(() => {
-      this.tick()
-    }, 100);      
-  }
-
-  state = {
-    position: 0,
-    lastPosition: null
-  }
-  static iconHeight = 188;
-  multiplier = Math.floor(Math.random()*(4-1)+1);
-
-  start = this.setStartPosition();
-  speed = Spinner.iconHeight * this.multiplier;    
-
-  setStartPosition() {
-    return ((Math.floor((Math.random()*9))) * Spinner.iconHeight)*-1;
-  }
-
-  moveBackground() {
-    this.setState({ 
-      position: this.state.position - this.speed,
-      timeRemaining: this.state.timeRemaining - 100
-    })
-  }
-
-  getSymbolFromPosition() {
-    const totalSymbols = 9;
-    const maxPosition = (Spinner.iconHeight * (totalSymbols-1)*-1);
-    let moved = (this.props.timer/100) * this.multiplier
-    let startPosition = this.start;
-    let currentPosition = startPosition;    
-
-    for (let i = 0; i < moved; i++) {              
-      currentPosition -= Spinner.iconHeight;
-
-      if (currentPosition < maxPosition) {
-        currentPosition = 0;
-      }      
-    }
-
-    this.props.onFinish(currentPosition);
-  }
-
-  tick() {      
-    if (this.state.timeRemaining <= 0) {
-      clearInterval(this.timer);        
-      this.getSymbolFromPosition();    
-
-    } else {
-      this.moveBackground();
-    }      
-  }
-
-  componentDidMount() {
-    clearInterval(this.timer);
-
-    this.setState({
-      position: this.start,
-      timeRemaining: this.props.timer
-    });
-
-    this.timer = setInterval(() => {
-      this.tick()
-    }, 100);
-  }
-
-  render() {
-    let { position } = this.state;   
-
-    return (            
-      <div 
-        style={{backgroundPosition: '0px ' + position + 'px'}}
-        className={`icons`}          
-      />
-    )
-  }
 }
 
-export default App;
+export default Slots;
