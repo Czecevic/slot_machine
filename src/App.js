@@ -15,18 +15,21 @@ class Slots extends Component {
     this.slotRef = [createRef(), createRef(), createRef()]
   }
 
+  Sound = () => {
+
+  }
+
   roll = () => {
     this.setState({
       rolling: true
     });
     setTimeout(() => {
       this.setState({rolling: false});
-    }, 900);
+    }, 700);
 
     this.slotRef.forEach((slot, i) => {
       const selected = this.triggerSlotRotation(slot.current);
       this.setState({ [`text${i + 1}`]: selected});
-      console.log(this.setState({ [`text${i + 1}`]: selected}))
     });
   };
   getRandomInt = (min, max) =>{
@@ -34,7 +37,8 @@ class Slots extends Component {
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min)) + min;
   };
-  triggerSlotRotation = ref => {this.getRandomInt(0,3)
+  triggerSlotRotation = ref => {
+    this.getRandomInt(1,20)
     function setTop(top) {
       ref.style.top = `${top}px`;
     }
@@ -43,7 +47,7 @@ class Slots extends Component {
       Math.random() * Slots.defaultProps.text.length
     );
     let choosenOption = options[randomOption];
-    setTop(this.triggerSlotRotation());
+    setTop(-choosenOption.offsetTop + 2);
     return Slots.defaultProps.text[randomOption];
   };
   render() {
@@ -64,7 +68,7 @@ class Slots extends Component {
           <section>
             <div className="container" ref={this.slotRef[1]}>
               {Slots.defaultProps.text[1].map((texte, i ) => (
-                <div key={i}>
+                <div>
                   <span>{texte}</span>
                 </div>
               ))}
@@ -75,7 +79,7 @@ class Slots extends Component {
           <section>
             <div className="container" ref={this.slotRef[2]}>
               {Slots.defaultProps.text[2].map((texte, i) => (
-                <div key={i}>
+                <div>
                   <span>{texte}</span>
                 </div>
               ))}
